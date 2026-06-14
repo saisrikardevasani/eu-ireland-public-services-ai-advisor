@@ -1,0 +1,60 @@
+app = "eu-ireland-advisor"
+primary_region = "lhr"  # London — closest to Ireland
+
+[build]
+  dockerfile = "backend/Dockerfile"
+  dockerignore_file = "backend/.dockerignore"
+
+[env]
+  PORT = "8000"
+  EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
+  EMBEDDING_DIM = "384"
+  BM25_TOP_K = "20"
+  DENSE_TOP_K = "20"
+  FINAL_TOP_K = "5"
+  RERANKER_ENABLED = "true"
+  RERANKER_MODEL = "BAAI/bge-reranker-base"
+  DEBUG = "false"
+
+# Secrets (injected via `fly secrets set`, never in this file):
+#   DATABASE_URL
+#   DATABASE_SYNC_URL
+#   REDIS_URL
+#   LLM_PROVIDER
+#   NVIDIA_API_KEY
+#   NVIDIA_MODEL
+
+[[services]]
+  internal_port = 8000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.http_checks]]
+    interval = "15s"
+    timeout = "10s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/health"
+
+[mounts]
+  # Model cache persisted across deploys so we don't re-download 400MB each time
+  source = "model_cache"
+  destination = "/root/.cache"
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1

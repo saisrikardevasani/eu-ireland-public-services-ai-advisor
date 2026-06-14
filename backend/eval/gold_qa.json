@@ -1,0 +1,242 @@
+[
+  {
+    "id": "q01",
+    "question": "When must I apply for Stamp 1G after graduating?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/moving-to-ireland/studying-in-ireland/third-level-graduate-programme/",
+    "expected_doc_title": "Third Level Graduate Programme (Stamp 1G)",
+    "key_facts": ["6 months", "date of your award"],
+    "notes": "Tests specific deadline knowledge"
+  },
+  {
+    "id": "q02",
+    "question": "How long does a Stamp 1G permission last for a PhD graduate?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/moving-to-ireland/studying-in-ireland/third-level-graduate-programme/",
+    "expected_doc_title": "Third Level Graduate Programme (Stamp 1G)",
+    "key_facts": ["24 months", "PhD"],
+    "notes": "Tests duration differentiation by qualification level"
+  },
+  {
+    "id": "q03",
+    "question": "What is the minimum salary for a Critical Skills Employment Permit if my job is not on the Critical Skills list?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/working-in-ireland/employment-permits/critical-skills-employment-permit/",
+    "expected_doc_title": "Critical Skills Employment Permit",
+    "key_facts": ["€64,000"],
+    "notes": "Tests specific salary threshold for non-listed occupations"
+  },
+  {
+    "id": "q04",
+    "question": "Can I bring my family to Ireland on a Critical Skills Employment Permit?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/working-in-ireland/employment-permits/critical-skills-employment-permit/",
+    "expected_doc_title": "Critical Skills Employment Permit",
+    "key_facts": ["family", "immediate family"],
+    "notes": "Tests family reunification rights"
+  },
+  {
+    "id": "q05",
+    "question": "Do I have to pay USC if I earn less than €13,000 a year?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/tax/income-tax/universal-social-charge/",
+    "expected_doc_title": "Universal Social Charge (USC)",
+    "key_facts": ["€13,000", "exempt"],
+    "notes": "Tests USC exemption threshold"
+  },
+  {
+    "id": "q06",
+    "question": "What is the USC rate on income between €12,012 and €25,760?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/tax/income-tax/universal-social-charge/",
+    "expected_doc_title": "Universal Social Charge (USC)",
+    "key_facts": ["2%"],
+    "notes": "Tests specific USC band rate"
+  },
+  {
+    "id": "q07",
+    "question": "How many PRSI contributions do I need to qualify for Jobseeker's Benefit?",
+    "expected_url": "https://www.citizensinformation.ie/en/social-welfare/unemployed-people/jobseekers-benefit/",
+    "expected_doc_title": "Jobseeker's Benefit",
+    "key_facts": ["104", "39"],
+    "notes": "Tests PRSI contribution requirements"
+  },
+  {
+    "id": "q08",
+    "question": "How long can I claim Jobseeker's Benefit if I have over 260 PRSI contributions?",
+    "expected_url": "https://www.citizensinformation.ie/en/social-welfare/unemployed-people/jobseekers-benefit/",
+    "expected_doc_title": "Jobseeker's Benefit",
+    "key_facts": ["9 months", "234 days"],
+    "notes": "Tests maximum duration with full contributions"
+  },
+  {
+    "id": "q09",
+    "question": "What is the difference between Jobseeker's Benefit and Jobseeker's Allowance?",
+    "expected_url": "https://www.citizensinformation.ie/en/social-welfare/unemployed-people/jobseekers-allowance/",
+    "expected_doc_title": "Jobseeker's Allowance",
+    "key_facts": ["means-tested", "PRSI"],
+    "notes": "Tests conceptual distinction between the two payments"
+  },
+  {
+    "id": "q10",
+    "question": "Is Jobseeker's Allowance means-tested?",
+    "expected_url": "https://www.citizensinformation.ie/en/social-welfare/unemployed-people/jobseekers-allowance/",
+    "expected_doc_title": "Jobseeker's Allowance",
+    "key_facts": ["means-tested", "income"],
+    "notes": "Tests a simple factual retrieval"
+  },
+  {
+    "id": "q11",
+    "question": "What is the higher rate of income tax in Ireland and when does it apply?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/tax/income-tax/how-your-tax-is-calculated/",
+    "expected_doc_title": "How your income tax is calculated in Ireland",
+    "key_facts": ["40%", "standard rate cut-off"],
+    "notes": "Tests higher rate threshold knowledge"
+  },
+  {
+    "id": "q12",
+    "question": "What is the standard rate cut-off point for a single person in Ireland in 2025?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/tax/income-tax/how-your-tax-is-calculated/",
+    "expected_doc_title": "How your income tax is calculated in Ireland",
+    "key_facts": ["€44,000"],
+    "notes": "Tests specific numeric fact retrieval"
+  },
+  {
+    "id": "q13",
+    "question": "What is the weekly income limit for a medical card for a single person aged under 70 living alone?",
+    "expected_url": "https://www.citizensinformation.ie/en/health/medical-cards-and-gp-visit-cards/medical-card/",
+    "expected_doc_title": "Medical Card",
+    "key_facts": ["€184"],
+    "notes": "Tests specific income threshold"
+  },
+  {
+    "id": "q14",
+    "question": "What health services are free with a medical card in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/health/medical-cards-and-gp-visit-cards/medical-card/",
+    "expected_doc_title": "Medical Card",
+    "key_facts": ["GP", "prescribed medications", "hospital"],
+    "notes": "Tests coverage breadth knowledge"
+  },
+  {
+    "id": "q15",
+    "question": "Where do I apply for a PPSN in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/government-in-ireland/national-government/national-government/ppsn/",
+    "expected_doc_title": "Personal Public Service Number (PPSN)",
+    "key_facts": ["Intreo Centre", "in person"],
+    "notes": "Tests procedural application knowledge"
+  },
+  {
+    "id": "q16",
+    "question": "Do I need a PPSN to work in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/government-in-ireland/national-government/national-government/ppsn/",
+    "expected_doc_title": "Personal Public Service Number (PPSN)",
+    "key_facts": ["PPSN", "tax", "working"],
+    "notes": "Tests basic purpose of PPSN"
+  },
+  {
+    "id": "q17",
+    "question": "What is the national minimum wage in Ireland in 2025?",
+    "expected_url": "https://www.citizensinformation.ie/en/employment/employment-rights-and-conditions/pay-and-employment/minimum-wage/",
+    "expected_doc_title": "National Minimum Wage",
+    "key_facts": ["€13.50"],
+    "notes": "Tests a specific numeric fact"
+  },
+  {
+    "id": "q18",
+    "question": "Does the minimum wage apply to workers under 20 in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/employment/employment-rights-and-conditions/pay-and-employment/minimum-wage/",
+    "expected_doc_title": "National Minimum Wage",
+    "key_facts": ["under 20", "sub-minimum"],
+    "notes": "Tests age-related exception"
+  },
+  {
+    "id": "q19",
+    "question": "How much is the PAYE tax credit in 2025?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/tax/income-tax-credits-and-reliefs/employment-tax-credit/",
+    "expected_doc_title": "PAYE Tax Credit",
+    "key_facts": ["€1,875"],
+    "notes": "Tests specific credit amount"
+  },
+  {
+    "id": "q20",
+    "question": "Who is eligible for the PAYE tax credit?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/tax/income-tax-credits-and-reliefs/employment-tax-credit/",
+    "expected_doc_title": "PAYE Tax Credit",
+    "key_facts": ["PAYE", "employee", "income tax"],
+    "notes": "Tests eligibility condition"
+  },
+  {
+    "id": "q21",
+    "question": "How much is Child Benefit in Ireland per month?",
+    "expected_url": "https://www.citizensinformation.ie/en/social-welfare/families-and-children/child-benefit/",
+    "expected_doc_title": "Child Benefit",
+    "key_facts": ["€140"],
+    "notes": "Tests specific payment amount"
+  },
+  {
+    "id": "q22",
+    "question": "Until what age is Child Benefit paid in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/social-welfare/families-and-children/child-benefit/",
+    "expected_doc_title": "Child Benefit",
+    "key_facts": ["16", "18"],
+    "notes": "Tests age cut-off with education exception"
+  },
+  {
+    "id": "q23",
+    "question": "When must a non-EEA national register with Irish immigration?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/moving-to-ireland/rights-of-residence-in-ireland/registration-of-non-eea-nationals-in-ireland/",
+    "expected_doc_title": "Registration of Non-EEA Nationals — Irish Residence Permit (IRP)",
+    "key_facts": ["90 days"],
+    "notes": "Tests the 90-day registration threshold"
+  },
+  {
+    "id": "q24",
+    "question": "Where do I register for an IRP in Dublin?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/moving-to-ireland/rights-of-residence-in-ireland/registration-of-non-eea-nationals-in-ireland/",
+    "expected_doc_title": "Registration of Non-EEA Nationals — Irish Residence Permit (IRP)",
+    "key_facts": ["Burgh Quay", "appointment"],
+    "notes": "Tests specific Dublin registration location"
+  },
+  {
+    "id": "q25",
+    "question": "What is a Part IV tenancy and when do I get one?",
+    "expected_url": "https://www.citizensinformation.ie/en/housing/renting-a-home/tenants-rights-and-responsibilities/types-of-tenancy/",
+    "expected_doc_title": "Renting in Ireland — Tenants' Rights",
+    "key_facts": ["6 months", "security of tenure", "6 years"],
+    "notes": "Tests Part IV tenancy trigger and duration"
+  },
+  {
+    "id": "q26",
+    "question": "Can my landlord evict me during a fixed-term tenancy in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/housing/renting-a-home/tenants-rights-and-responsibilities/types-of-tenancy/",
+    "expected_doc_title": "Renting in Ireland — Tenants' Rights",
+    "key_facts": ["fixed-term", "without good reason"],
+    "notes": "Tests fixed-term tenancy protections"
+  },
+  {
+    "id": "q27",
+    "question": "How many types of employment permit are there in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/working-in-ireland/employment-permits/overview-employment-permits/",
+    "expected_doc_title": "Overview of Employment Permits in Ireland",
+    "key_facts": ["nine"],
+    "notes": "Tests knowledge of permit type count"
+  },
+  {
+    "id": "q28",
+    "question": "What is the minimum salary for a General Employment Permit in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/moving-country/working-in-ireland/employment-permits/overview-employment-permits/",
+    "expected_doc_title": "Overview of Employment Permits in Ireland",
+    "key_facts": ["€34,000"],
+    "notes": "Tests General Employment Permit salary floor"
+  },
+  {
+    "id": "q29",
+    "question": "Do I need to be an Irish citizen to open a bank account in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/personal-finance/banking/opening-a-bank-account/",
+    "expected_doc_title": "Opening a Bank Account in Ireland",
+    "key_facts": ["not need", "citizen"],
+    "notes": "Tests a common misconception"
+  },
+  {
+    "id": "q30",
+    "question": "What documents do I need to open a bank account in Ireland?",
+    "expected_url": "https://www.citizensinformation.ie/en/money-and-tax/personal-finance/banking/opening-a-bank-account/",
+    "expected_doc_title": "Opening a Bank Account in Ireland",
+    "key_facts": ["proof of identity", "proof of address"],
+    "notes": "Tests procedural document requirements"
+  }
+]

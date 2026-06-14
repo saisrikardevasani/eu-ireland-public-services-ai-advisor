@@ -1,14 +1,19 @@
-.PHONY: help db-up db-down migrate ingest backend frontend
+.PHONY: help db-up db-down migrate ingest backend frontend eval-retrieval eval-answers eval
 
 help:
-	@echo "Week 1 dev commands:"
-	@echo "  make db-up       Start Postgres + Redis in Docker"
-	@echo "  make db-down     Stop and remove containers"
-	@echo "  make migrate     Apply database migrations"
-	@echo "  make seed        Load fixture documents (fast, no crawling)"
-	@echo "  make ingest      Crawl Citizens Information live (slow)"
-	@echo "  make backend     Start the FastAPI backend (hot reload)"
-	@echo "  make frontend    Start the Next.js frontend (hot reload)"
+	@echo "Dev commands:"
+	@echo "  make db-up            Start Postgres + Redis in Docker"
+	@echo "  make db-down          Stop and remove containers"
+	@echo "  make migrate          Apply database migrations"
+	@echo "  make seed             Load fixture documents (fast, no crawling)"
+	@echo "  make ingest           Crawl Citizens Information live (slow)"
+	@echo "  make backend          Start the FastAPI backend (hot reload)"
+	@echo "  make frontend         Start the Next.js frontend (hot reload)"
+	@echo ""
+	@echo "Eval commands (Week 2):"
+	@echo "  make eval-retrieval   Recall@5 across 30 gold questions (fast, no LLM)"
+	@echo "  make eval-answers     Faithfulness eval via LLM-as-judge (calls NVIDIA API)"
+	@echo "  make eval             Run both evals"
 
 db-up:
 	docker-compose up -d postgres redis
@@ -34,3 +39,13 @@ backend:
 
 frontend:
 	cd frontend && npm run dev
+
+# ── Eval (Week 2) ─────────────────────────────────────────────────────────────
+
+eval-retrieval:
+	cd backend && .venv/bin/python eval/retrieval_eval.py --k 5 --fail-below 0.80
+
+eval-answers:
+	cd backend && .venv/bin/python eval/answer_eval.py --fail-below 0.70
+
+eval: eval-retrieval eval-answers

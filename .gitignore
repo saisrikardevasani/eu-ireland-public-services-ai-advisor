@@ -1,0 +1,47 @@
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+.env
+backend/.env
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+htmlcov/
+.coverage
+.coverage.*
+
+# ── Node ──────────────────────────────────────────────────────────────────────
+node_modules/
+.next/
+.turbo/
+out/
+
+# ── ML model cache (large binary files) ──────────────────────────────────────
+.cache/
+*.bin
+*.safetensors
+*.onnx
+*.pt
+*.pth
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.iml

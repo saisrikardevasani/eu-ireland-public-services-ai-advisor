@@ -1,111 +1,145 @@
 # EU & Ireland Public Services AI Advisor
 
-A production-grade RAG (Retrieval-Augmented Generation) chatbot that answers questions about Irish public services — immigration, tax, health, housing, and employment — with **cited, grounded answers** linked to official government sources.
+A RAG (Retrieval-Augmented Generation) chatbot that answers questions about Irish public services — immigration, tax, benefits, housing, and employment — with **cited, grounded answers** linked directly to official government sources.
 
-> Built as a 4-week learning project: build a real product, learn the engineering behind it.
+Built as a real engineering project from scratch, not a tutorial. Every answer cites its source so you can verify it yourself.
 
-**Live demo:**
-- Frontend: https://eu-and-ireland-public-services-ai-a.vercel.app
-- Backend API: https://srikarcod3r-eu-ireland-advisor.hf.space/v1/health
+---
+
+## Try It Live
+
+> **Frontend (chat UI):** https://eu-and-ireland-public-services-ai-a.vercel.app
+>
+> **Backend API:** https://srikarcod3r-eu-ireland-advisor.hf.space/docs
+
+**A note on cold starts:** The backend runs on Hugging Face Spaces free tier, which puts the container to sleep after about 15 minutes of inactivity. If you send a message and it takes 10–20 seconds with no response, the backend is just waking up — give it a moment and it'll be fine. Subsequent messages are instant.
+
+If the chat doesn't respond at all, you can check whether the backend is alive by visiting:
+https://srikarcod3r-eu-ireland-advisor.hf.space/v1/health
+
+It should return `{"status":"ok","database":"connected"}`. If it does, the app is up.
 
 ---
 
 ## What It Does
 
-Ask a question like *"When can I switch from Stamp 2 to Stamp 1G?"* and the system:
+Ask something like *"How do I apply for a medical card?"* or *"What's the minimum wage in Ireland?"* and the system:
 
-1. Embeds your question into a 384-dimensional vector
-2. Runs **hybrid retrieval** — BM25 full-text search + dense cosine similarity — sequentially
-3. Fuses results with **Reciprocal Rank Fusion (RRF)** to get 20 candidates
-4. **Cross-encoder reranks** all 20 with BAAI/bge-reranker-base to find the best 5
-5. Streams a grounded answer from **Llama 3.1** (via NVIDIA free API) token-by-token
-6. Returns clickable citation chips linking every claim to its source
+1. Converts your question into a 384-dimensional embedding vector
+2. Runs **hybrid retrieval** — BM25 keyword search and dense vector search — across 20 official government documents
+3. Merges both result lists using **Reciprocal Rank Fusion (RRF)** to get the best 20 candidates
+4. Re-ranks them with a **cross-encoder** (reads query + passage together — much more accurate than cosine similarity alone) to pick the top 5
+5. Streams a grounded answer token-by-token from **Llama 3.1** via the NVIDIA free API
+6. Returns citation chips — every claim is linked to the exact government page it came from
 
-Every factual claim is cited. The model is instructed never to answer outside the retrieved context.
+The model is explicitly instructed not to answer from general knowledge. If it's not in the retrieved documents, it says so.
 
 ---
 
-## Architecture (v0.3)
+## Architecture
 
 ```
 User question
      │
      ▼
-[Query Embedder]  ←── BAAI/bge-small-en-v1.5 (384-dim)
+[Embedder] — BAAI/bge-small-en-v1.5 (384-dim, runs inside the container)
      │
-     ├──────────────────────────────────────┐
-     ▼                                      ▼
-[BM25 Search]                        [Dense Search]
-Postgres tsvector + ts_rank_cd       pgvector cosine (HNSW)
-top 20 candidates                    top 20 candidates
-     │                                      │
-     └──────────────┬───────────────────────┘
+     ├─────────────────────────────────┐
+     ▼                                 ▼
+[BM25 Search]                   [Dense Search]
+Postgres tsvector               pgvector + HNSW index
+top 20 by term frequency        top 20 by cosine similarity
+     │                                 │
+     └──────────────┬──────────────────┘
                     ▼
-            [RRF Fusion]
-            score = Σ 1/(60 + rank)
-            pool of 20 candidates
+             [RRF Fusion]
+             score = Σ 1/(60 + rank)
+             top 20 merged candidates
                     │
                     ▼
-       [Cross-Encoder Reranker]
-       BAAI/bge-reranker-base
-       reads (query, passage) pairs
-       top 5 chunks — parent window
+      [Cross-Encoder Reranker]
+      BAAI/bge-reranker-base
+      reads (query + passage) together
+      picks top 5 — uses parent chunk for wider context
                     │
                     ▼
-         [Llama 3.1 via NVIDIA API]
-         Streams tokens with [n] citations
+       [Llama 3.1 8B via NVIDIA NIM]
+       streams answer with [n] citation markers
                     │
                     ▼
-         [SSE stream → Next.js UI]
+      [Server-Sent Events → Next.js UI]
 ```
 
-### Tech Stack
+---
 
-| Layer | Technology |
-|---|---|
-| **API** | FastAPI + Server-Sent Events (SSE) |
-| **Database** | PostgreSQL 16 + pgvector (Supabase) |
-| **Full-text search** | Postgres `tsvector` / `ts_rank_cd` |
-| **Vector search** | pgvector cosine similarity + HNSW index |
-| **Embeddings** | `BAAI/bge-small-en-v1.5` via sentence-transformers |
-| **Reranker** | `BAAI/bge-reranker-base` cross-encoder |
-| **LLM** | `meta/llama-3.1-8b-instruct` via NVIDIA NIM (free tier) |
-| **Frontend** | Next.js 16 + Tailwind CSS |
-| **Cache** | Upstash Redis (serverless) |
-| **Backend hosting** | Hugging Face Spaces (free, Docker) |
-| **Frontend hosting** | Vercel (free) |
-| **Migrations** | Alembic |
+## Tech Stack
+
+| Layer | Technology | Cost |
+|---|---|---|
+| **Frontend** | Next.js 16 + Tailwind CSS | Free (Vercel) |
+| **Backend** | FastAPI + Python 3.11 | Free (Hugging Face Spaces) |
+| **Database** | PostgreSQL 16 + pgvector | Free (Supabase) |
+| **Vector index** | HNSW via pgvector | — |
+| **Full-text search** | Postgres tsvector | — |
+| **Cache** | Redis (serverless) | Free (Upstash) |
+| **Embeddings** | BAAI/bge-small-en-v1.5 | Free (runs locally in container) |
+| **Reranker** | BAAI/bge-reranker-base | Free (runs locally in container) |
+| **LLM** | Llama 3.1 8B via NVIDIA NIM | Free tier |
+| **Migrations** | Alembic | — |
+
+**Total hosting cost: $0/month.**
+
+---
+
+## What's Covered
+
+The knowledge base has 20 documents across two official sources:
+
+**Citizens Information** (15 documents)
+- Stamp 1G — Third Level Graduate Programme
+- Critical Skills Employment Permit
+- IRP (Irish Residence Permit) registration
+- PPSN — Personal Public Service Number
+- Medical Card and GP Visit Card
+- USC — Universal Social Charge
+- How income tax is calculated
+- PAYE Tax Credit
+- Minimum Wage
+- Jobseeker's Benefit
+- Jobseeker's Allowance
+- Child Benefit
+- Tenants' rights and types of tenancy
+- Opening a bank account in Ireland
+- Employment Permits overview
+
+**Revenue.ie** (5 documents)
+- What is PAYE?
+- Rent Tax Credit
+- Capital Gains Tax (CGT)
+- Who must file a tax return
+- Flat Rate Expenses
 
 ---
 
 ## Versions
 
-### v0.1 — Hybrid RAG pipeline
-- FastAPI backend with BM25 + dense vector retrieval
-- RRF fusion, streaming SSE endpoint
-- Next.js chat UI with citation chips
-- 15 Citizens Information seed documents
+### v0.1 — Working RAG pipeline
+The core. FastAPI backend with hybrid BM25 + dense retrieval, RRF fusion, and a streaming Next.js UI. 15 Citizens Information documents. NVIDIA free API for the LLM.
 
 ### v0.2 — Eval harness
-- 30 gold Q&A pairs across all documents
-- Retrieval eval: Recall@5, MRR, avg rank
-- Answer eval: LLM-as-judge faithfulness scoring
-- GitHub Actions CI: retrieval gates on every PR
-- **Results: 100% Recall@5, avg rank 1.0, faithfulness 0.93**
+30 gold Q&A pairs (2 per document). Automated retrieval eval measuring Recall@5 and Mean Reciprocal Rank. LLM-as-judge faithfulness scoring. GitHub Actions CI — retrieval eval runs on every PR, answer eval runs on push to main.
 
-### v0.3 — Hierarchical chunking + reranking
-- Child chunks (128 words) embedded for precision; parent chunks (512 words) sent to LLM
-- HNSW vector index for faster approximate nearest-neighbour search
-- Cross-encoder reranker (BAAI/bge-reranker-base) after RRF fusion
-- Revenue.ie added as second source (PAYE, CGT, Rent Tax Credit, Flat Rate Expenses)
-- **20 documents, 63 chunks total**
+**Results:** 100% Recall@5 · Avg rank 1.0 · Faithfulness 0.93/1.0
 
-### v0.4 — Free cloud deployment
-- Backend: Hugging Face Spaces (Docker, 2 vCPU / 16 GB RAM, free)
-- Frontend: Vercel (free)
-- Database: Supabase PostgreSQL + pgvector (free tier)
-- Cache: Upstash Redis serverless (free tier)
-- **$0/month total hosting cost**
+### v0.3 — Better retrieval
+Hierarchical chunking: child chunks (128 words) used for retrieval precision, parent chunks (512 words) sent to the LLM for wider context. HNSW vector index for faster search. Cross-encoder reranker added after RRF fusion. Revenue.ie added as a second source — 20 documents total.
+
+### v0.4 — Deployed (free stack)
+Everything running live at zero cost:
+- Backend on Hugging Face Spaces (Docker, 2 vCPU, 16 GB RAM — more than enough for the ML models)
+- Frontend on Vercel
+- Database on Supabase (PostgreSQL + pgvector)
+- Cache on Upstash (serverless Redis)
 
 ---
 
@@ -116,64 +150,63 @@ top 20 candidates                    top 20 candidates
 ├── backend/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── chat.py          # POST /v1/chat/messages — SSE streaming
-│   │   │   └── health.py        # GET /v1/health
+│   │   │   ├── chat.py           # POST /v1/chat/messages — SSE streaming endpoint
+│   │   │   └── health.py         # GET /v1/health + root redirect to /docs
 │   │   ├── ingestion/
-│   │   │   ├── chunker.py       # Hierarchical chunking (child + parent windows)
-│   │   │   ├── crawler.py       # Citizens Information web crawler
-│   │   │   ├── embedder.py      # Sentence-transformer embedding
-│   │   │   └── pipeline.py      # Ingest orchestrator (idempotent)
+│   │   │   ├── chunker.py        # Hierarchical chunking (child + parent windows)
+│   │   │   ├── crawler.py        # Citizens Information web crawler
+│   │   │   ├── embedder.py       # Sentence-transformer embedding
+│   │   │   └── pipeline.py       # Ingest orchestrator — idempotent, safe to rerun
 │   │   ├── models/
-│   │   │   └── schema.py        # SQLAlchemy ORM: Document + Chunk
+│   │   │   └── schema.py         # SQLAlchemy ORM: Document + Chunk tables
 │   │   ├── pipeline/
-│   │   │   ├── generator.py     # LLM answer generation (NVIDIA / Anthropic)
-│   │   │   ├── reranker.py      # Cross-encoder reranking (BAAI/bge-reranker-base)
-│   │   │   └── retrieval.py     # Hybrid BM25 + dense + RRF + rerank
-│   │   ├── config.py            # pydantic-settings config from .env
-│   │   ├── database.py          # Async SQLAlchemy engine + session
-│   │   └── main.py              # FastAPI app factory
+│   │   │   ├── generator.py      # LLM answer generation (NVIDIA or Anthropic)
+│   │   │   ├── reranker.py       # Cross-encoder reranking
+│   │   │   └── retrieval.py      # BM25 + dense + RRF + rerank pipeline
+│   │   ├── config.py             # All config via pydantic-settings + .env
+│   │   ├── database.py           # Async SQLAlchemy engine and session
+│   │   └── main.py               # FastAPI app + CORS
 │   ├── eval/
-│   │   ├── gold_qa.json         # 30 gold Q&A pairs
-│   │   ├── retrieval_eval.py    # Recall@5, MRR, avg rank
-│   │   └── answer_eval.py       # LLM-as-judge faithfulness
+│   │   ├── gold_qa.json          # 30 gold Q&A pairs with expected URLs and key facts
+│   │   ├── retrieval_eval.py     # Recall@5, MRR, average rank
+│   │   └── answer_eval.py        # LLM-as-judge faithfulness scoring
 │   ├── fixtures/
 │   │   ├── citizens_information.json   # 15 Citizens Information documents
 │   │   └── revenue_ie.json             # 5 Revenue.ie documents
-│   ├── migrations/              # Alembic migrations
+│   ├── migrations/               # Alembic migration files
 │   ├── scripts/
-│   │   ├── seed.py              # Load fixtures into database
-│   │   └── ingest.py            # Live crawler
+│   │   ├── seed.py               # Load fixtures into the database
+│   │   └── ingest.py             # Live web crawler (optional)
 │   ├── tests/
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── frontend/
 │   └── src/
 │       ├── app/
-│       │   ├── page.tsx         # Landing page
-│       │   └── chat/page.tsx    # Chat UI (streaming + citations)
+│       │   ├── page.tsx          # Landing page with example questions
+│       │   └── chat/page.tsx     # Chat UI — streaming tokens + citation chips
 │       ├── components/
-│       │   ├── ChatMessage.tsx  # Message bubbles + citation chips
-│       │   └── ChatInput.tsx    # Input box
-│       └── lib/api.ts           # SSE client
+│       │   ├── ChatMessage.tsx   # Message bubbles + citation links
+│       │   └── ChatInput.tsx     # Text input + send button
+│       └── lib/api.ts            # SSE streaming client
 ├── .github/
 │   └── workflows/
-│       └── eval.yml             # CI: retrieval eval on PR, answer eval on main
-├── docker-compose.yml           # Local dev: Postgres + Redis
-├── fly.toml                     # Fly.io config (unused — moved to HF Spaces)
-├── Makefile
-└── .env.example
+│       └── eval.yml              # CI: retrieval eval on PR, answer eval on main push
+├── docker-compose.yml            # Local dev: Postgres + Redis in Docker
+├── Makefile                      # Shortcuts for common dev commands
+└── .env.example                  # Template — copy to backend/.env and fill in keys
 ```
 
 ---
 
-## Quick Start (Local)
+## Running Locally
 
 ### Prerequisites
 
 - Docker Desktop
 - Python 3.11+
 - Node.js 18+
-- A free NVIDIA API key from [build.nvidia.com](https://build.nvidia.com)
+- A free NVIDIA API key — get one at [build.nvidia.com](https://build.nvidia.com)
 
 ### 1. Clone and configure
 
@@ -182,7 +215,7 @@ git clone https://github.com/saisrikardevasani/eu-ireland-public-services-ai-adv
 cd eu-ireland-public-services-ai-advisor
 
 cp .env.example backend/.env
-# Edit backend/.env — add your NVIDIA_API_KEY
+# Open backend/.env and paste your NVIDIA_API_KEY
 ```
 
 ### 2. Start the database
@@ -191,7 +224,7 @@ cp .env.example backend/.env
 make db-up
 ```
 
-Starts Postgres 16 (with pgvector) and Redis 7 in Docker.
+Starts Postgres 16 (with pgvector) and Redis in Docker.
 
 ### 3. Run migrations
 
@@ -205,27 +238,21 @@ make migrate
 make seed
 ```
 
-Loads 20 documents (15 Citizens Information + 5 Revenue.ie). First run downloads the 134 MB embedding model.
+Loads all 20 documents. First run downloads the 134 MB embedding model — takes about 30 seconds. Subsequent runs are instant (idempotent).
 
-### 5. Start backend + frontend
+### 5. Start the backend
 
 ```bash
-make backend   # http://localhost:8000
-make frontend  # http://localhost:3000
+make backend
+# API running at http://localhost:8000
+# Interactive docs at http://localhost:8000/docs
 ```
 
----
-
-## Available Commands
+### 6. Start the frontend
 
 ```bash
-make db-up      # Start Postgres + Redis in Docker
-make db-down    # Stop and remove containers
-make migrate    # Apply database migrations
-make seed       # Load fixture documents
-make ingest     # Crawl Citizens Information live
-make backend    # Start FastAPI backend (hot reload)
-make frontend   # Start Next.js frontend (hot reload)
+make frontend
+# UI at http://localhost:3000
 ```
 
 ---
@@ -234,23 +261,26 @@ make frontend   # Start Next.js frontend (hot reload)
 
 ### `POST /v1/chat/messages`
 
-Streams an answer via Server-Sent Events.
+Streams a grounded answer as Server-Sent Events.
 
 **Request:**
 ```json
 { "message": "How do I apply for a medical card?" }
 ```
 
-**Response stream (SSE):**
+**Response stream:**
 ```
 event: meta
 data: {"retrieved_count": 5}
 
 event: token
-data: {"text": "To apply for a medical card..."}
+data: {"text": "To apply"}
+
+event: token
+data: {"text": " for a medical card..."}
 
 event: citations
-data: {"citations": [{"n": 1, "title": "Medical Card", "url": "...", "snippet": "..."}]}
+data: {"citations": [{"n": 1, "title": "Medical Card", "url": "https://...", "snippet": "..."}]}
 
 event: done
 data: {"message": "Stream complete"}
@@ -258,95 +288,63 @@ data: {"message": "Stream complete"}
 
 ### `GET /v1/health`
 
-Returns `{"status": "ok", "database": "connected"}`.
-
----
-
-## How Retrieval Works
-
-**BM25** (Postgres `tsvector`): tokenises and stems the query, ranks by term frequency. Best for exact terms like "Stamp 1G" or "USC rate".
-
-**Dense** (pgvector HNSW): embeds query and chunks into 384-dim vectors, ranks by cosine similarity. Best for semantic matches — "switching visa" finds "changing immigration permission".
-
-**RRF Fusion**: merges the two ranked lists with `score = Σ 1/(60 + rank)`. Documents appearing in both lists get boosted. Parameter-free.
-
-**Cross-encoder reranker**: reads each `(query, passage)` pair together — far more accurate than cosine similarity, which encodes query and passage independently. The top 5 after reranking are sent to the LLM as parent-window chunks.
-
-**Hierarchical chunking**: child chunks (128 words) are used for retrieval precision; when found, their parent chunk (512 words) is sent to the LLM for wider context.
-
----
-
-## Sources Covered
-
-**Citizens Information (15 documents)**
-- Stamp 1G (Third Level Graduate Programme)
-- Critical Skills Employment Permit
-- IRP registration
-- PPSN
-- Medical Card and GP Visit Card
-- USC (Universal Social Charge)
-- Income Tax calculation
-- PAYE Tax Credit
-- Minimum Wage
-- Jobseeker's Benefit and Allowance
-- Child Benefit
-- Tenants' Rights
-- Opening a Bank Account
-- Employment Permits overview
-
-**Revenue.ie (5 documents)**
-- What is PAYE?
-- Rent Tax Credit
-- Capital Gains Tax (CGT)
-- Who Must File a Tax Return
-- Flat Rate Expenses
+```json
+{"status": "ok", "database": "connected"}
+```
 
 ---
 
 ## Configuration
 
-All config is via environment variables in `backend/.env`. See `.env.example`.
+All config lives in `backend/.env` (copy from `.env.example`).
 
 | Variable | Default | Description |
 |---|---|---|
 | `LLM_PROVIDER` | `nvidia` | `nvidia` or `anthropic` |
-| `NVIDIA_MODEL` | `meta/llama-3.1-8b-instruct` | Any NVIDIA NIM model |
-| `EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` | sentence-transformers model |
-| `RERANKER_MODEL` | `BAAI/bge-reranker-base` | Cross-encoder model |
-| `RERANKER_ENABLED` | `true` | Toggle reranking |
+| `NVIDIA_API_KEY` | — | Required. Get free at build.nvidia.com |
+| `NVIDIA_MODEL` | `meta/llama-3.1-8b-instruct` | Any model on NVIDIA NIM |
+| `EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` | Sentence-transformers model name |
+| `RERANKER_MODEL` | `BAAI/bge-reranker-base` | Cross-encoder model name |
+| `RERANKER_ENABLED` | `true` | Set to `false` to skip reranking |
 | `BM25_TOP_K` | `20` | BM25 candidates before RRF |
-| `DENSE_TOP_K` | `20` | Dense candidates before RRF |
-| `FINAL_TOP_K` | `5` | Chunks passed to LLM |
+| `DENSE_TOP_K` | `20` | Dense vector candidates before RRF |
+| `FINAL_TOP_K` | `5` | Chunks sent to the LLM after reranking |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed origins |
+| `DATABASE_URL` | — | asyncpg connection string |
+| `REDIS_URL` | `redis://localhost:6379` | Redis connection string |
 
 ---
 
 ## Eval Results (v0.3)
 
+Run against 30 gold Q&A pairs covering all 20 documents.
+
 | Metric | Score |
 |---|---|
-| Recall@5 | **100%** (30/30 questions) |
-| Average rank | **1.0** |
-| LLM faithfulness | **0.93 / 1.0** |
+| Recall@5 | **100%** — the right document appeared in the top 5 for every single question |
+| Average rank | **1.0** — the right document was ranked #1 on average |
+| Faithfulness | **0.93 / 1.0** — answers stayed grounded in the retrieved context |
 
 ---
 
 ## Disclaimer
 
-This tool provides **informational guidance only**. It is not a substitute for professional legal, tax, or immigration advice. Always verify with official sources:
+This is an informational tool, not legal or professional advice. Always check directly with the official sources:
 
 - [citizensinformation.ie](https://www.citizensinformation.ie)
 - [revenue.ie](https://www.revenue.ie)
 - [irishimmigration.ie](https://www.irishimmigration.ie)
 
+The knowledge base was seeded in June 2026. Government policies change — always verify with the official source before acting on anything.
+
 ---
 
 ## License
 
-[Apache 2.0](LICENSE) — see licence terms for permitted use, modification, and distribution.
+[Apache 2.0](LICENSE)
 
 ---
 
 ## Contributing
 
-Pull requests welcome. Open an issue first for significant changes.
+Issues and PRs welcome. If you want to add more documents to the knowledge base, add them to `backend/fixtures/` in the same JSON format as the existing files and run `make seed`.

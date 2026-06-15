@@ -1,10 +1,16 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import RedirectResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 
 router = APIRouter()
+
+
+@router.get("/")
+async def root() -> RedirectResponse:
+    return RedirectResponse(url="/docs")
 
 
 @router.get("/v1/health")

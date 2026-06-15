@@ -296,22 +296,52 @@ data: {"message": "Stream complete"}
 
 ## Configuration
 
-All config lives in `backend/.env` (copy from `.env.example`).
+Copy `.env.example` to `backend/.env` and fill in your values. Never commit `backend/.env` — it contains secrets.
+
+### Database
+
+| Variable | Example | Description |
+|---|---|---|
+| `DATABASE_URL` | `postgresql+asyncpg://user:pass@host:5432/db` | Used by FastAPI at runtime. Must use the `asyncpg` driver prefix. |
+| `DATABASE_SYNC_URL` | `postgresql://user:pass@host:5432/db` | Used by Alembic for migrations only. Same host/credentials, no `+asyncpg`. |
+| `REDIS_URL` | `redis://localhost:6379` | Use `rediss://` (double-s) for TLS connections like Upstash. |
+
+Both database URLs are required. They point to the same database — the difference is just the driver prefix.
+
+### LLM
 
 | Variable | Default | Description |
 |---|---|---|
-| `LLM_PROVIDER` | `nvidia` | `nvidia` or `anthropic` |
-| `NVIDIA_API_KEY` | — | Required. Get free at build.nvidia.com |
-| `NVIDIA_MODEL` | `meta/llama-3.1-8b-instruct` | Any model on NVIDIA NIM |
-| `EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` | Sentence-transformers model name |
-| `RERANKER_MODEL` | `BAAI/bge-reranker-base` | Cross-encoder model name |
-| `RERANKER_ENABLED` | `true` | Set to `false` to skip reranking |
-| `BM25_TOP_K` | `20` | BM25 candidates before RRF |
-| `DENSE_TOP_K` | `20` | Dense vector candidates before RRF |
-| `FINAL_TOP_K` | `5` | Chunks sent to the LLM after reranking |
-| `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed origins |
-| `DATABASE_URL` | — | asyncpg connection string |
-| `REDIS_URL` | `redis://localhost:6379` | Redis connection string |
+| `LLM_PROVIDER` | `nvidia` | `nvidia` to use NVIDIA NIM (free), or `anthropic` to use Claude. |
+| `NVIDIA_API_KEY` | — | Required when `LLM_PROVIDER=nvidia`. Get a free key at [build.nvidia.com](https://build.nvidia.com). |
+| `NVIDIA_MODEL` | `meta/llama-3.1-8b-instruct` | Fast and free. `meta/llama-3.3-70b-instruct` gives better quality but has a ~36s cold start on the free tier. |
+| `ANTHROPIC_API_KEY` | — | Required when `LLM_PROVIDER=anthropic`. Get a key at [console.anthropic.com](https://console.anthropic.com). |
+
+### Embeddings & Reranking
+
+| Variable | Default | Description |
+|---|---|---|
+| `EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` | 134 MB, 384-dim, runs on CPU. Downloads automatically on first run. For better quality you can use `BAAI/bge-m3` (1024-dim) but update `EMBEDDING_DIM` too. |
+| `EMBEDDING_DIM` | `384` | Must match the model above. If you change the model, change this too or pgvector will reject inserts. |
+| `RERANKER_MODEL` | `BAAI/bge-reranker-base` | Cross-encoder that re-ranks candidates after RRF fusion. ~1.1 GB, runs on CPU. |
+| `RERANKER_ENABLED` | `true` | Set to `false` to skip reranking and go straight from RRF to the LLM. Useful if you're low on RAM. |
+
+### Retrieval tuning
+
+| Variable | Default | Description |
+|---|---|---|
+| `BM25_TOP_K` | `20` | How many candidates BM25 returns before RRF fusion. |
+| `DENSE_TOP_K` | `20` | How many candidates the vector search returns before RRF fusion. |
+| `FINAL_TOP_K` | `5` | How many chunks (after reranking) are sent to the LLM as context. |
+
+The pipeline is: BM25 (top 20) + Dense (top 20) → RRF merge → Reranker → top 5 to LLM.
+
+### App
+
+| Variable | Default | Description |
+|---|---|---|
+| `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated list of origins allowed to call the API. In production, set this to your frontend URL. |
+| `DEBUG` | `false` | Enables verbose logging. Don't set this in production. |
 
 ---
 

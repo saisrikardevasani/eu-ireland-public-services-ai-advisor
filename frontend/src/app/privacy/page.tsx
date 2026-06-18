@@ -69,8 +69,7 @@ export default function PrivacyPage() {
               ["#third-parties", "4. Third-party processors and international transfers"],
               ["#retention", "5. Retention"],
               ["#your-rights", "6. Your rights"],
-              ["#dpc", "7. How to complain"],
-              ["#contact", "8. Contact"],
+              ["#contact", "7. Contact"],
             ].map(([href, label]) => (
               <li key={href}>
                 <a href={href} className="hover:text-forest-900 hover:underline transition-colors">{label}</a>
@@ -248,28 +247,7 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section id="dpc" title="7. How to complain">
-          <p>
-            If you are not satisfied with how we handle your personal data, you have the right to
-            lodge a complaint with the Irish supervisory authority:
-          </p>
-          <div className="mt-3 p-4 rounded-lg bg-white border border-stone-200 text-sm">
-            <p className="font-semibold text-stone-900">Data Protection Commission (DPC)</p>
-            <p className="mt-1">21 Fitzwilliam Square South, Dublin 2, D02 RD28, Ireland</p>
-            <p>
-              <a href="https://www.dataprotection.ie" target="_blank" rel="noopener noreferrer" className="underline text-forest-700 hover:text-forest-900">
-                www.dataprotection.ie
-              </a>
-            </p>
-            <p>Phone: +353 (0)76 1104 800</p>
-          </div>
-          <p>
-            You may also complain to the supervisory authority in the EU member state where you
-            live or work, or where the alleged infringement occurred.
-          </p>
-        </Section>
-
-        <Section id="contact" title="8. Contact">
+        <Section id="contact" title="7. Contact">
           <p>
             For any question about this privacy notice or to exercise your rights, contact:
           </p>

@@ -36,6 +36,7 @@ class RetrievedChunk:
     url: str
     title: str
     rrf_score: float
+    crawled_at: str | None = None
 
 
 async def bm25_search(session: AsyncSession, query: str, k: int) -> list[dict]:
@@ -49,6 +50,7 @@ async def bm25_search(session: AsyncSession, query: str, k: int) -> list[dict]:
                 c.parent_content,
                 d.url,
                 d.title,
+                TO_CHAR(d.crawled_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS crawled_at,
                 ts_rank_cd(c.content_tsv, plainto_tsquery('english', :query)) AS score
             FROM chunks c
             JOIN documents d ON d.id = c.document_id
@@ -64,11 +66,15 @@ async def bm25_search(session: AsyncSession, query: str, k: int) -> list[dict]:
 async def dense_search(
     session: AsyncSession, query_embedding: list[float], k: int
 ) -> list[dict]:
-    """Cosine similarity search via pgvector (HNSW index from migration 002)."""
-    vec_literal = "[" + ",".join(f"{x:.8f}" for x in query_embedding) + "]"
+    """Cosine similarity search via pgvector (HNSW index from migration 002).
+
+    The embedding is passed as a cast text parameter rather than f-string
+    interpolation so the query is stable and safe regardless of embedding values.
+    """
+    vec_str = "[" + ",".join(f"{x:.8f}" for x in query_embedding) + "]"
 
     result = await session.execute(
-        text(f"""
+        text("""
             SELECT
                 CAST(c.id AS TEXT)          AS id,
                 CAST(c.document_id AS TEXT) AS document_id,
@@ -76,14 +82,15 @@ async def dense_search(
                 c.parent_content,
                 d.url,
                 d.title,
-                1 - (c.embedding <=> '{vec_literal}'::vector) AS score
+                TO_CHAR(d.crawled_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS crawled_at,
+                1 - (c.embedding <=> CAST(:vec AS vector)) AS score
             FROM chunks c
             JOIN documents d ON d.id = c.document_id
             WHERE c.embedding IS NOT NULL
-            ORDER BY c.embedding <=> '{vec_literal}'::vector
+            ORDER BY c.embedding <=> CAST(:vec AS vector)
             LIMIT :k
         """),
-        {"k": k},
+        {"vec": vec_str, "k": k},
     )
     return [dict(row._mapping) for row in result]
 
@@ -118,6 +125,7 @@ def rrf_fusion(
             url=metadata[doc_id]["url"],
             title=metadata[doc_id]["title"],
             rrf_score=score,
+            crawled_at=metadata[doc_id].get("crawled_at"),
         )
         for doc_id, score in ranked
     ]

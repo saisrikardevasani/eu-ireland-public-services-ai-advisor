@@ -15,6 +15,7 @@ engineering in this system. It instructs the model to:
 
 import logging
 from collections.abc import AsyncIterator
+from typing import TypedDict
 
 from app.config import settings
 from app.pipeline.retrieval import RetrievedChunk
@@ -42,42 +43,51 @@ FORMAT:
 - Use [1], [2], [3] inline citations immediately after each factual claim"""
 
 
+class Turn(TypedDict):
+    role: str   # "user" | "assistant"
+    content: str
+
+
 def _build_context_block(chunks: list[RetrievedChunk]) -> str:
     parts = []
     for i, chunk in enumerate(chunks, start=1):
-        # Use the wider parent window if available (v0.3 hierarchical chunking)
         context = chunk.parent_content or chunk.content
         parts.append(f"[{i}] SOURCE: {chunk.title}\nURL: {chunk.url}\n\n{context}")
     return "\n\n---\n\n".join(parts)
 
 
-async def _generate_nvidia(question: str, chunks: list[RetrievedChunk]) -> AsyncIterator[str]:
+def _build_user_turn(question: str, chunks: list[RetrievedChunk]) -> str:
+    context_block = _build_context_block(chunks)
+    return (
+        f"Context passages:\n\n{context_block}\n\n---\n\n"
+        f"Question: {question}\n\n"
+        f"Please answer based solely on the context passages above, citing each claim with [n]."
+    )
+
+
+async def _generate_nvidia(
+    question: str, chunks: list[RetrievedChunk], history: list[Turn]
+) -> AsyncIterator[str]:
     """Stream via NVIDIA's OpenAI-compatible API (free tier)."""
     from openai import AsyncOpenAI
+    from openai.types.chat import ChatCompletionMessageParam
 
     client = AsyncOpenAI(
         base_url="https://integrate.api.nvidia.com/v1",
         api_key=settings.nvidia_api_key,
     )
 
-    context_block = _build_context_block(chunks)
-    messages = [
+    messages: list[ChatCompletionMessageParam] = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {
-            "role": "user",
-            "content": (
-                f"Context passages:\n\n{context_block}\n\n---\n\n"
-                f"Question: {question}\n\n"
-                f"Please answer based solely on the context passages above, citing each claim with [n]."
-            ),
-        },
+        *[{"role": h["role"], "content": h["content"]} for h in history],  # type: ignore[misc]
+        {"role": "user", "content": _build_user_turn(question, chunks)},
     ]
 
     stream = await client.chat.completions.create(
         model=settings.nvidia_model,
-        messages=messages,  # type: ignore[arg-type]
+        messages=messages,
         max_tokens=1500,
-        temperature=0.1,  # low temperature = more factual, less creative
+        temperature=0.1,
         stream=True,
     )
 
@@ -89,32 +99,35 @@ async def _generate_nvidia(question: str, chunks: list[RetrievedChunk]) -> Async
             yield content
 
 
-async def _generate_anthropic(question: str, chunks: list[RetrievedChunk]) -> AsyncIterator[str]:
+async def _generate_anthropic(
+    question: str, chunks: list[RetrievedChunk], history: list[Turn]
+) -> AsyncIterator[str]:
     """Stream via Anthropic Claude (fallback)."""
     import anthropic
+    from anthropic.types import MessageParam
 
     client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
-    context_block = _build_context_block(chunks)
+
+    messages: list[MessageParam] = [
+        *[{"role": h["role"], "content": h["content"]} for h in history],  # type: ignore[misc]
+        {"role": "user", "content": _build_user_turn(question, chunks)},
+    ]
 
     async with client.messages.stream(
         model="claude-sonnet-4-6",
         max_tokens=1500,
         system=SYSTEM_PROMPT,
-        messages=[
-            {
-                "role": "user",
-                "content": (
-                    f"Context passages:\n\n{context_block}\n\n---\n\n"
-                    f"Question: {question}\n\nCite each claim with [n]."
-                ),
-            }
-        ],
+        messages=messages,
     ) as stream:
         async for token in stream.text_stream:
             yield token
 
 
-async def generate(question: str, chunks: list[RetrievedChunk]) -> AsyncIterator[str]:
+async def generate(
+    question: str,
+    chunks: list[RetrievedChunk],
+    history: list[Turn] | None = None,
+) -> AsyncIterator[str]:
     """Route to the configured LLM provider and stream the answer."""
     if not chunks:
         yield (
@@ -122,6 +135,8 @@ async def generate(question: str, chunks: list[RetrievedChunk]) -> AsyncIterator
             "Please try rephrasing, or visit citizensinformation.ie directly."
         )
         return
+
+    prior: list[Turn] = history or []
 
     logger.info(
         "Generating via %s for: %s...", settings.llm_provider, question[:60]
@@ -131,11 +146,11 @@ async def generate(question: str, chunks: list[RetrievedChunk]) -> AsyncIterator
         if not settings.nvidia_api_key:
             yield "Error: NVIDIA_API_KEY is not set in .env. Add it and restart the backend."
             return
-        async for token in _generate_nvidia(question, chunks):
+        async for token in _generate_nvidia(question, chunks, prior):
             yield token
     else:
         if not settings.anthropic_api_key:
             yield "Error: ANTHROPIC_API_KEY is not set in .env. Add it and restart the backend."
             return
-        async for token in _generate_anthropic(question, chunks):
+        async for token in _generate_anthropic(question, chunks, prior):
             yield token

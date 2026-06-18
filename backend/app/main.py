@@ -2,14 +2,24 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 
-from app.api import chat, health
+from app.api import chat, feedback, health
+
+limiter = Limiter(key_func=get_remote_address, default_limits=["20/minute"])
 
 app = FastAPI(
     title="Ireland Public Services AI Advisor",
-    version="0.1.0",
+    version="0.5.0",
     description="RAG system over Irish government and EU legislative sources.",
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 _raw = os.getenv("CORS_ORIGINS", "http://localhost:3000")
 _origins = [o.strip() for o in _raw.split(",") if o.strip()]
@@ -24,3 +34,4 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(chat.router)
+app.include_router(feedback.router)

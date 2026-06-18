@@ -18,12 +18,13 @@ interface StreamCallbacks {
 
 export async function streamChat(
   question: string,
-  callbacks: StreamCallbacks
+  callbacks: StreamCallbacks,
+  conversationId?: string,
 ): Promise<void> {
   const response = await fetch("/api/v1/chat/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: question }),
+    body: JSON.stringify({ message: question, conversation_id: conversationId ?? null }),
   });
 
   if (!response.ok) {

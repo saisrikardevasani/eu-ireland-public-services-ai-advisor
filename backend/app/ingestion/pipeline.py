@@ -50,15 +50,18 @@ async def ingest_pages(session: AsyncSession, pages: list[dict]) -> dict:
             stats["skipped"] += 1
             continue
 
-        # Delete old document (cascades to chunks) if it exists
+        # Delete old document (cascades to chunks) if it exists, then flush
+        # so the DELETE is visible before the INSERT — raw SQL bypasses the ORM
+        # identity map, so we must flush explicitly to avoid a UniqueViolation.
         await session.execute(
             text("DELETE FROM documents WHERE url = :url"), {"url": url}
         )
+        await session.flush()
 
         # Create new document record
         doc = Document(
             id=uuid.uuid4(),
-            source="citizensinformation",
+            source=page.get("source", "citizensinformation"),
             url=url,
             title=page["title"],
             content_hash=content_hash,

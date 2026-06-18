@@ -24,6 +24,7 @@ function ChatContent() {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [warmup, setWarmup] = useState<WarmupState>("checking");
+  const [conversationId, setConversationId] = useState(() => crypto.randomUUID());
   const bottomRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
 
@@ -57,49 +58,53 @@ function ChatContent() {
     setInput("");
     setIsStreaming(true);
 
-    setMessages((prev) => [...prev, { role: "user", content: question }]);
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", content: question }]);
     setMessages((prev) => [
       ...prev,
-      { role: "assistant", content: "", isStreaming: true },
+      { id: crypto.randomUUID(), role: "assistant", content: "", isStreaming: true },
     ]);
 
-    await streamChat(question, {
-      onToken: (token) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          updated[updated.length - 1] = { ...last, content: last.content + token };
-          return updated;
-        });
+    await streamChat(
+      question,
+      {
+        onToken: (token) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            updated[updated.length - 1] = { ...last, content: last.content + token };
+            return updated;
+          });
+        },
+        onCitations: (citations) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { ...updated[updated.length - 1], citations };
+            return updated;
+          });
+        },
+        onDone: () => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { ...updated[updated.length - 1], isStreaming: false };
+            return updated;
+          });
+          setIsStreaming(false);
+        },
+        onError: (message) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              ...updated[updated.length - 1],
+              content: `Error: ${message}`,
+              isStreaming: false,
+            };
+            return updated;
+          });
+          setIsStreaming(false);
+        },
       },
-      onCitations: (citations) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = { ...updated[updated.length - 1], citations };
-          return updated;
-        });
-      },
-      onDone: () => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = { ...updated[updated.length - 1], isStreaming: false };
-          return updated;
-        });
-        setIsStreaming(false);
-      },
-      onError: (message) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            role: "assistant",
-            content: `Error: ${message}`,
-            isStreaming: false,
-          };
-          return updated;
-        });
-        setIsStreaming(false);
-      },
-    });
+      conversationId,
+    );
   }
 
   return (
@@ -129,9 +134,19 @@ function ChatContent() {
             Ireland Public Services Advisor
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-forest-300 inline-block" />
-          <span className="text-xs text-forest-300 hidden sm:block">Sources cited</span>
+        <div className="flex items-center gap-3">
+          {messages.length > 0 && (
+            <button
+              onClick={() => { setMessages([]); setInput(""); setConversationId(crypto.randomUUID()); }}
+              className="text-xs text-forest-300 hover:text-white border border-forest-600 hover:border-forest-400 rounded px-2.5 py-1 transition-colors"
+            >
+              New conversation
+            </button>
+          )}
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-forest-300 inline-block" />
+            <span className="text-xs text-forest-300 hidden sm:block">Sources cited</span>
+          </div>
         </div>
       </header>
 
@@ -161,7 +176,7 @@ function ChatContent() {
                 </h2>
                 <p className="text-stone-500 text-sm max-w-sm mx-auto leading-relaxed">
                   Every answer is grounded in official sources —
-                  Citizens Information, Revenue, Gov.ie, DSP, RTB, WRC.
+                  Citizens Information, Revenue, DSP, RTB, WRC, HSE.
                 </p>
               </div>
 
@@ -208,7 +223,15 @@ function ChatContent() {
           )}
 
           {messages.map((msg, i) => (
-            <ChatMessage key={i} message={msg} />
+            <ChatMessage
+              key={msg.id}
+              message={msg}
+              question={
+                msg.role === "assistant"
+                  ? messages[i - 1]?.content
+                  : undefined
+              }
+            />
           ))}
 
           <div ref={bottomRef} />
@@ -225,7 +248,8 @@ function ChatContent() {
             disabled={isStreaming}
           />
           <p className="text-center text-xs text-stone-400 mt-3 leading-relaxed">
-            Informational only · Not legal or professional advice · Queries processed by NVIDIA AI (US) · Do not include personal details
+            Informational only · Not legal or professional advice · Queries processed by NVIDIA AI (US) · Do not include personal details ·{" "}
+            <Link href="/privacy" className="underline hover:text-stone-600">Privacy Notice</Link>
           </p>
         </div>
       </div>

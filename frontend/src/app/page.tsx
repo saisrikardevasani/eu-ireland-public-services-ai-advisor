@@ -17,7 +17,7 @@ const HOW_IT_WORKS = [
   {
     step: "02",
     title: "AI searches official sources",
-    text: "Revenue, Citizens Information, ISD, DSP, HSE — the relevant official guidance is located and synthesised in seconds.",
+    text: "Revenue, Citizens Information, DSP, RTB, WRC, HSE — the relevant official guidance is located and synthesised in seconds.",
   },
   {
     step: "03",
@@ -29,16 +29,16 @@ const HOW_IT_WORKS = [
 const SOURCES = [
   { name: "Citizens Information", abbr: "CI" },
   { name: "Revenue.ie", abbr: "Rev" },
-  { name: "Gov.ie", abbr: "Gov" },
-  { name: "Irish Immigration", abbr: "ISD" },
   { name: "Dept. Social Protection", abbr: "DSP" },
+  { name: "RTB", abbr: "RTB" },
+  { name: "Workplace Relations", abbr: "WRC" },
   { name: "HSE", abbr: "HSE" },
 ];
 
 const TRUST_POINTS = [
   {
     title: "Official sources only",
-    body: "Every answer draws from Revenue, Citizens Information, Gov.ie, ISD, DSP, or HSE — not general internet content.",
+    body: "Every answer draws from Revenue, Citizens Information, Gov.ie/DSP, RTB, WRC, or HSE — not general internet content.",
   },
   {
     title: "Every claim is cited",
@@ -77,7 +77,7 @@ export default function HomePage() {
               Ireland Public Services Advisor
             </span>
             <span className="hidden sm:inline-block text-[10px] font-semibold text-forest-300 bg-forest-700 border border-forest-600 rounded px-2 py-0.5 tracking-wide">
-              v0.4
+              v0.5
             </span>
           </div>
           <div className="flex items-center gap-6">
@@ -176,8 +176,8 @@ export default function HomePage() {
             <div className="space-y-4 text-stone-500 leading-relaxed text-sm">
               <p>
                 The Irish public services landscape is vast. Revenue, Citizens Information,
-                ISD, DSP, HSE — each with their own portals, eligibility rules, and processes.
-                Most people don&apos;t know where to start.
+                the Department of Social Protection, RTB, WRC, HSE — each with their own portals,
+                eligibility rules, and processes. Most people don&apos;t know where to start.
               </p>
               <p>
                 This tool brings it together. Ask a question in plain English and get an answer
@@ -261,7 +261,7 @@ export default function HomePage() {
             Official sources only.
           </h2>
           <p className="text-stone-400 text-sm mb-10">
-            Every answer is grounded in guidance from these Irish authorities.
+            Every answer is grounded in guidance from these six Irish authorities.
           </p>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
             {SOURCES.map((source) => (
@@ -320,10 +320,20 @@ export default function HomePage() {
       {/* ── Terms & Privacy ────────────────────────────────────── */}
       <section id="terms" className="border-t border-stone-200 bg-stone-50">
         <div className="max-w-5xl mx-auto px-6 py-16">
-          <p className="text-forest-600 text-xs font-semibold uppercase tracking-[0.15em] mb-4">Terms &amp; Privacy</p>
-          <h2 className="font-serif text-2xl text-stone-900 mb-8">
-            How this service works and what you should know.
-          </h2>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-forest-600 text-xs font-semibold uppercase tracking-[0.15em] mb-2">Terms &amp; Privacy</p>
+              <h2 className="font-serif text-2xl text-stone-900">
+                How this service works and what you should know.
+              </h2>
+            </div>
+            <Link
+              href="/privacy"
+              className="text-xs text-forest-600 hover:text-forest-800 underline underline-offset-2 shrink-0 ml-6"
+            >
+              Full Privacy Notice →
+            </Link>
+          </div>
           <div className="grid md:grid-cols-2 gap-8">
 
             <div className="space-y-5">

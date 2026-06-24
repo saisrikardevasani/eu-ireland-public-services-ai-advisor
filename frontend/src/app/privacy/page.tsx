@@ -6,8 +6,8 @@ export const metadata = {
   description: "How your data is handled when you use this service.",
 };
 
-const LAST_UPDATED = "18 June 2025";
-const VERSION = "1.0";
+const LAST_UPDATED = "24 June 2025";
+const VERSION = "1.1";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -102,10 +102,25 @@ export default function PrivacyPage() {
             including personal identifiers).
           </p>
           <p>
+            <strong>Feedback ratings:</strong> If you submit a thumbs up or thumbs down rating on
+            an answer, a one-way SHA-256 hash of your question text is stored alongside the rating
+            and a timestamp in our database (Supabase, EU West). The hash is cryptographically
+            irreversible — your original question text cannot be recovered from it. No answer
+            content is stored.
+          </p>
+          <p>
+            <strong>Analytics:</strong> This site uses Vercel Analytics, which collects anonymised
+            page-view data (page URL, referrer, browser type, country). No personal identifiers,
+            IP addresses, or query content are included. See{" "}
+            <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline text-forest-700 hover:text-forest-900">
+              Vercel&apos;s Privacy Policy
+            </a>.
+          </p>
+          <p>
             <strong>Data we do not collect or store:</strong> This service does not log, store, or
-            retain your questions, answers, or session history in any database operated by the
-            controller. No user accounts are created. No cookies are set by this service for
-            tracking purposes.
+            retain your raw question text, answers, or session history in any database operated by
+            the controller. No user accounts are created. No cookies are set by this service for
+            tracking or advertising purposes.
           </p>
           <p>
             <strong>Technical data:</strong> Standard web server logs (IP address, timestamp,
@@ -174,9 +189,15 @@ export default function PrivacyPage() {
                 </tr>
                 <tr>
                   <td className="px-3 py-2 font-medium">Upstash Inc.</td>
-                  <td className="px-3 py-2">Query result cache (no PII stored)</td>
+                  <td className="px-3 py-2">Query result cache + rate limit counters (SHA-256 keyed, no raw query text)</td>
                   <td className="px-3 py-2">EU West</td>
                   <td className="px-3 py-2">Within EEA — no transfer</td>
+                </tr>
+                <tr className="bg-stone-50">
+                  <td className="px-3 py-2 font-medium">Vercel Analytics</td>
+                  <td className="px-3 py-2">Anonymised page-view analytics (no query content, no IP stored)</td>
+                  <td className="px-3 py-2">United States</td>
+                  <td className="px-3 py-2">SCCs</td>
                 </tr>
               </tbody>
             </table>
@@ -200,9 +221,16 @@ export default function PrivacyPage() {
 
         <Section id="retention" title="5. Retention">
           <p>
-            Your question text is not stored by this service. It is transmitted to NVIDIA&apos;s
+            Your raw question text is not stored by this service. It is transmitted to NVIDIA&apos;s
             API and discarded after the response is generated. NVIDIA&apos;s own retention policy
             applies to any data it may log for service operation — see their privacy policy.
+          </p>
+          <p>
+            Feedback ratings (thumbs up/down) are stored as SHA-256 hashes with no associated
+            raw text and are retained for service improvement purposes. You may request deletion
+            by contacting the controller — however, because hashes cannot be reversed, we cannot
+            identify which hash corresponds to your question without you providing the exact
+            original text.
           </p>
           <p>
             The knowledge base (official Irish guidance documents) is retained indefinitely and

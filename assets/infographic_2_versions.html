@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1200">
+  <title>Built in 4 Weeks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      background: #FDFCF9;
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .left {
+      width: 300px;
+      flex-shrink: 0;
+      background: #1C3D2E;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left::before {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      right: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(45, 106, 79, .3);
+    }
+
+    .left::after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      left: -50px;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: rgba(183, 228, 199, .06);
+    }
+
+    .left-top,
+    .left-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .left-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .brand-stars {
+      font-size: 8px;
+      color: #FFD700;
+      letter-spacing: 2px;
+    }
+
+    .left h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 38px;
+      line-height: 1.1;
+      color: #FAFAF8;
+      font-weight: 400;
+    }
+
+    .left h1 em {
+      font-style: italic;
+      color: #B7E4C7;
+    }
+
+    .tagline {
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #74B894;
+      margin-top: 18px;
+    }
+
+    .results-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #74B894;
+      margin-bottom: 10px;
+    }
+
+    .results-block {
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 7px;
+    }
+
+    .result-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .result-label {
+      font-size: 11.5px;
+      color: #9ED8B8;
+    }
+
+    .result-val {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      color: #B7E4C7;
+    }
+
+    .nvidia-note {
+      margin-top: 12px;
+      font-size: 10px;
+      color: #52986E;
+      line-height: 1.4;
+    }
+
+    .nvidia-note strong {
+      color: #74B894;
+    }
+
+    .right {
+      flex: 1;
+      padding: 34px 38px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .right-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 2px;
+    }
+
+    .right-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: #1A1A1A;
+    }
+
+    .right-header span {
+      font-size: 12px;
+      color: #9B8B6E;
+      font-weight: 500;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 13px;
+      flex: 1;
+    }
+
+    .card {
+      border-radius: 12px;
+      padding: 17px 19px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      border: 1px solid transparent;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .version-pill {
+      font-family: 'DM Serif Display', serif;
+      font-size: 13px;
+      padding: 2px 10px;
+      border-radius: 100px;
+    }
+
+    .card-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1A1A1A;
+    }
+
+    .card-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .card-bullets li {
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+
+    .card-bullets li::before {
+      content: '→';
+      flex-shrink: 0;
+      font-size: 11px;
+      margin-top: 1px;
+    }
+
+    .c1 {
+      background: #EBF5FF;
+      border-color: #BFDBFE;
+    }
+
+    .c1 .version-pill {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .c1 .card-bullets li {
+      color: #1E3A8A;
+    }
+
+    .c1 .card-bullets li::before {
+      color: #3B82F6;
+    }
+
+    .c2 {
+      background: #F0FDF4;
+      border-color: #BBF7D0;
+    }
+
+    .c2 .version-pill {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .c2 .card-bullets li {
+      color: #14532D;
+    }
+
+    .c2 .card-bullets li::before {
+      color: #22C55E;
+    }
+
+    .c3 {
+      background: #FAF5FF;
+      border-color: #DDD6FE;
+    }
+
+    .c3 .version-pill {
+      background: #EDE9FE;
+      color: #5B21B6;
+    }
+
+    .c3 .card-bullets li {
+      color: #4C1D95;
+    }
+
+    .c3 .card-bullets li::before {
+      color: #8B5CF6;
+    }
+
+    .c4 {
+      background: #FFF7ED;
+      border-color: #FED7AA;
+    }
+
+    .c4 .version-pill {
+      background: #FFEDD5;
+      color: #9A3412;
+    }
+
+    .c4 .card-bullets li {
+      color: #7C2D12;
+    }
+
+    .c4 .card-bullets li::before {
+      color: #F97316;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="left">
+    <div class="left-top">
+      <div class="left-brand">
+        <img src="harp.svg" width="22" height="34" style="opacity:.75;">
+      </div>
+      <h1>Built<br>in <em>6</em><br>Versions</h1>
+      <p class="tagline">Eval-first RAG chatbot for Irish public services — CI quality gates from day one. Fáilte.</p>
+    </div>
+    <div class="left-bottom">
+      <div class="results-label">Final eval results — v0.3</div>
+      <div class="results-block">
+        <div class="result-row"><span class="result-label">Recall@5</span><span class="result-val">100%</span></div>
+        <div class="result-row"><span class="result-label">Avg rank</span><span class="result-val">1.0</span></div>
+        <div class="result-row"><span class="result-label">Faithfulness</span><span class="result-val">0.93</span></div>
+        <div class="result-row"><span class="result-label">Hosting cost</span><span class="result-val">$0/mo</span>
+        </div>
+      </div>
+      <p class="nvidia-note">LLM: <strong>Llama 3.3 70B via NVIDIA NIM free API</strong> — zero LLM cost</p>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="right-header">
+      <h2>Six versions, one system</h2>
+      <span>Ireland Public Services AI Advisor</span>
+    </div>
+    <div class="grid">
+      <div class="card c1">
+        <div class="card-header"><span class="version-pill">v0.1</span><span class="card-title">Core Pipeline</span>
+        </div>
+        <ul class="card-bullets">
+          <li>Hybrid BM25 + dense vector retrieval</li>
+          <li>RRF fusion — no parameters to tune</li>
+          <li>Streaming SSE chat UI with citation chips</li>
+          <li>NVIDIA NIM free API — zero LLM cost</li>
+        </ul>
+      </div>
+      <div class="card c2">
+        <div class="card-header"><span class="version-pill">v0.2</span><span class="card-title">Eval Harness</span>
+        </div>
+        <ul class="card-bullets">
+          <li>30 gold Q&amp;A pairs across all documents</li>
+          <li>Recall@5, MRR, average rank metrics</li>
+          <li>LLM-as-judge faithfulness scoring</li>
+          <li>GitHub Actions CI — gates on every PR</li>
+        </ul>
+      </div>
+      <div class="card c3">
+        <div class="card-header"><span class="version-pill">v0.5</span><span class="card-title">Scale</span>
+        </div>
+        <ul class="card-bullets">
+          <li>20 → 1,640 docs across 6 official Irish sources</li>
+          <li>16,326 vector chunks indexed in Supabase</li>
+          <li>Multi-source async crawler — sitemaps + URL filters</li>
+          <li>Llama 3.1 8B → Llama 3.3 70B upgrade</li>
+        </ul>
+      </div>
+      <div class="card c4">
+        <div class="card-header"><span class="version-pill">v0.6</span><span class="card-title">Production Hardening</span></div>
+        <ul class="card-bullets">
+          <li>RLS enabled on all Supabase tables — was CRITICAL alert</li>
+          <li>GDPR Article 13 privacy notice + SHA-256 feedback hashing</li>
+          <li>20 req/day rate limit in Redis + SQL injection fix</li>
+          <li>Markdown rendering, multi-turn memory, 28 unit tests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

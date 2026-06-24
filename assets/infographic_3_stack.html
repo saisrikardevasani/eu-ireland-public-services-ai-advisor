@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1200">
+  <title>Free Stack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      background: #FDFCF9;
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 34px 52px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .eu-stars-gold {
+      font-size: 9px;
+      color: #FFD700;
+      letter-spacing: 2px;
+    }
+
+    .brand-ireland {
+      font-size: 10px;
+      color: #9B8B6E;
+      font-style: italic;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #9B8B6E;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 40px;
+      font-weight: 400;
+      color: #1A1A1A;
+      line-height: 1.05;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: #2D6A4F;
+    }
+
+    .header-right {
+      text-align: right;
+      padding-top: 4px;
+    }
+
+    .big-zero {
+      font-family: 'DM Serif Display', serif;
+      font-size: 72px;
+      color: #1C3D2E;
+      line-height: 1;
+    }
+
+    .per-month {
+      font-size: 14px;
+      color: #9B8B6E;
+      font-weight: 500;
+      letter-spacing: .04em;
+      margin-top: -4px;
+    }
+
+    .divider {
+      height: 1px;
+      background: #E8E3D8;
+      margin: 22px 52px 0;
+      flex-shrink: 0;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 13px;
+      padding: 18px 52px 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .card {
+      border-radius: 14px;
+      padding: 18px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      border: 1px solid #E8E3D8;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -28px;
+      right: -28px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      opacity: .07;
+    }
+
+    .card-vercel::after {
+      background: #000;
+    }
+
+    .card-hf::after {
+      background: #FF6B35;
+    }
+
+    .card-supabase::after {
+      background: #3ECF8E;
+    }
+
+    .card-upstash::after {
+      background: #00C98D;
+    }
+
+    .card-nvidia {
+      background: #F8FEEF;
+      border-color: #D4F4A0;
+    }
+
+    .card-nvidia::after {
+      background: #76B900;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .card-icon img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .free-badge {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .nvidia-badge {
+      background: #E8FCC6;
+      color: #3B5F00;
+    }
+
+    .card-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1A1A1A;
+    }
+
+    .card-role {
+      font-size: 11.5px;
+      color: #6B7280;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .card-details {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+    }
+
+    .card-details li {
+      font-size: 11px;
+      color: #4B5563;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+    }
+
+    .card-details li::before {
+      content: '·';
+      color: #C4B9A8;
+      font-size: 14px;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+
+    .card-vercel .card-icon {
+      background: #F3F4F6;
+    }
+
+    .card-hf .card-icon {
+      background: #FFF8F0;
+    }
+
+    .card-supabase .card-icon {
+      background: #F0FDF9;
+    }
+
+    .card-upstash .card-icon {
+      background: #fff;
+    }
+
+    .card-nvidia .card-icon {
+      background: #fff;
+    }
+
+    .bottom {
+      padding: 12px 52px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .irish-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #9B8B6E;
+      line-height: 1.5;
+    }
+
+    .cta-link {
+      font-size: 11px;
+      font-weight: 600;
+      color: #2D6A4F;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1.5px solid #B7E4C7;
+      border-radius: 100px;
+      padding: 6px 14px;
+      background: #F0FDF4;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="header-brand">
+        <img src="harp.svg" width="16" height="25" style="opacity:.6;">
+      </div>
+      <div class="eyebrow">Production deployment</div>
+      <h1>A full ML stack<br>for <em>nothing</em>.</h1>
+    </div>
+    <div class="header-right">
+      <div class="big-zero">$0</div>
+      <div class="per-month">per month · no credit card</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="cards">
+
+    <!-- Vercel — no logo file, using inline SVG -->
+    <div class="card card-vercel">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg viewBox="0 0 76 65" width="22" height="19" fill="#111827">
+            <path d="M37.53 0L75.06 65H0z" />
+          </svg>
+        </div>
+        <span class="free-badge">Free</span>
+      </div>
+      <div>
+        <div class="card-name">Vercel</div>
+        <div class="card-role">Frontend</div>
+      </div>
+      <ul class="card-details">
+        <li>Next.js 16 chat UI</li>
+        <li>Streaming SSE support</li>
+        <li>Vercel Analytics (anonymised)</li>
+        <li>Proxy rewrites to backend</li>
+      </ul>
+    </div>
+
+    <!-- Hugging Face — uses hf-logo.svg -->
+    <div class="card card-hf">
+      <div class="card-top">
+        <div class="card-icon">
+          <img src="hf-logo.svg" width="34" height="34">
+        </div>
+        <span class="free-badge">Free</span>
+      </div>
+      <div>
+        <div class="card-name">Hugging Face Spaces</div>
+        <div class="card-role">Backend API</div>
+      </div>
+      <ul class="card-details">
+        <li>FastAPI in Docker</li>
+        <li>2 vCPU · 16 GB RAM</li>
+        <li>Embeddings + reranker</li>
+        <li>No GPU needed</li>
+      </ul>
+    </div>
+
+    <!-- Supabase — no logo file, using inline SVG -->
+    <div class="card card-supabase">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="#3ECF8E">
+            <path
+              d="M21.362 9.354H12V.396a.396.396 0 0 0-.716-.233L2.203 12.424a.396.396 0 0 0 .327.603H12v8.579a.396.396 0 0 0 .716.233l9.081-12.261a.396.396 0 0 0-.435-.626z" />
+          </svg>
+        </div>
+        <span class="free-badge">Free</span>
+      </div>
+      <div>
+        <div class="card-name">Supabase</div>
+        <div class="card-role">Database</div>
+      </div>
+      <ul class="card-details">
+        <li>PostgreSQL 16</li>
+        <li>pgvector extension</li>
+        <li>HNSW index on chunks</li>
+        <li>BM25 via tsvector</li>
+      </ul>
+    </div>
+
+    <!-- Upstash — uses upstash-icon-white-bg.svg -->
+    <div class="card card-upstash">
+      <div class="card-top">
+        <div class="card-icon">
+          <img src="upstash-icon-white-bg.svg" width="36" height="36">
+        </div>
+        <span class="free-badge">Free</span>
+      </div>
+      <div>
+        <div class="card-name">Upstash</div>
+        <div class="card-role">Cache</div>
+      </div>
+      <ul class="card-details">
+        <li>Serverless Redis</li>
+        <li>Query cache (6h TTL, SHA-256 key)</li>
+        <li>Daily rate limit counters per IP</li>
+        <li>TLS · EU West · no idle connections</li>
+      </ul>
+    </div>
+
+    <!-- NVIDIA — uses nvidia-logo-vert-blk.png -->
+    <div class="card card-nvidia">
+      <div class="card-top">
+        <div class="card-icon">
+          <img src="nvidia-logo-vert-blk.png" width="36" height="30" style="object-fit:contain;">
+        </div>
+        <span class="free-badge nvidia-badge">Free</span>
+      </div>
+      <div>
+        <div class="card-name">NVIDIA NIM</div>
+        <div class="card-role">LLM (free API)</div>
+      </div>
+      <ul class="card-details">
+        <li>Llama 3.3 70B Instruct</li>
+        <li>Free tier via NIM API</li>
+        <li>Streaming token output</li>
+        <li>Zero LLM hosting cost</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="bottom">
+    <div class="irish-note">
+      <img src="harp.svg" width="11" height="17" style="opacity:.4;">
+      <span>ML models run in-container — <strong style="color:#4B5563;">BAAI/bge-small-en-v1.5</strong> (embeddings) +
+        <strong style="color:#4B5563;">BAAI/bge-reranker-base</strong> (reranker) · Built in Ireland 🇮🇪</span>
+    </div>
+    <a class="cta-link"
+      href="https://irish-public-services-ai-advisor.vercel.app">irish-public-services-ai-advisor.vercel.app →</a>
+  </div>
+
+</body>
+
+</html>

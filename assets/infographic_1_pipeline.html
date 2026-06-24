@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>RAG Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1200px; height:630px; background:#F8F7F4; font-family:'DM Sans',sans-serif; overflow:hidden; display:flex; flex-direction:column; }
+  .topbar { background:#1C3D2E; padding:0 36px; height:56px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+  .topbar-left { display:flex; align-items:center; gap:12px; }
+  .topbar-title { display:flex; flex-direction:column; gap:1px; }
+  .topbar-title h1 { font-family:'DM Serif Display',serif; color:#fff; font-size:16px; font-weight:400; line-height:1; }
+  .topbar-faílte { font-size:10px; font-style:italic; color:#74B894; letter-spacing:.04em; }
+  .topbar-right { display:flex; align-items:center; gap:14px; }
+  .eu-stars { font-size:9px; color:#FFD700; letter-spacing:3px; }
+  .topbar-source { font-size:11px; color:#74B894; font-weight:500; }
+  .main { flex:1; display:flex; flex-direction:column; padding:20px 36px 0; overflow:hidden; }
+  .section-label { font-size:11px; font-weight:600; letter-spacing:.1em; color:#9B8B6E; text-transform:uppercase; margin-bottom:5px; }
+  .pipeline-title { font-family:'DM Serif Display',serif; font-size:26px; font-weight:400; color:#1A1A1A; margin-bottom:16px; }
+  .pipeline { display:flex; align-items:stretch; flex:1; gap:0; }
+  .arrow-sep { width:34px; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding-bottom:4px; }
+  .step { flex:1; display:flex; }
+  .step-box { flex:1; border-radius:10px; padding:16px 13px; display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+  .step-num { font-family:'DM Mono',monospace; font-size:10px; opacity:.45; line-height:1; }
+  .step-title { font-size:13px; font-weight:600; line-height:1.3; }
+  .step-sub { font-size:10.5px; line-height:1.55; opacity:.7; flex:1; }
+  .step-tag { font-size:9.5px; font-weight:600; padding:2px 7px; border-radius:100px; letter-spacing:.04em; margin-top:auto; }
+  .s-blue { background:#EBF5FF; } .s-blue .step-num,.s-blue .step-title,.s-blue .step-sub { color:#1E3A8A; }
+  .s-purple { background:#F5F3FF; } .s-purple .step-num,.s-purple .step-title,.s-purple .step-sub { color:#4C1D95; }
+  .s-amber { background:#FFFBEB; } .s-amber .step-num,.s-amber .step-title,.s-amber .step-sub { color:#92400E; }
+  .s-amber .step-tag { background:#FDE68A; color:#78350F; }
+  .s-green { background:#F0FDF4; } .s-green .step-num,.s-green .step-title,.s-green .step-sub { color:#14532D; }
+  .hybrid-group { flex:2.1; display:flex; flex-direction:column; background:#E6F4EC; border-radius:12px; border:1.5px solid #B7E4C7; padding:10px; gap:8px; }
+  .hybrid-label { font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:#1C3D2E; text-align:center; flex-shrink:0; }
+  .hybrid-inner { flex:1; display:flex; gap:8px; }
+  .hybrid-inner .step { flex:1; }
+  .hybrid-inner .step-box { background:#fff; border:1px solid #D1FAE5; }
+  .hybrid-inner .step-box .step-num,.hybrid-inner .step-box .step-title,.hybrid-inner .step-box .step-sub { color:#14532D; }
+  .hybrid-divider { width:1px; background:#D1FAE5; flex-shrink:0; margin:4px 0; }
+  .stats { background:#1C3D2E; margin:14px -36px 0; padding:0 36px; height:60px; display:flex; align-items:center; flex-shrink:0; }
+  .stat { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-right:1px solid rgba(255,255,255,.07); padding:0 6px; }
+  .stat:last-child { border-right:none; }
+  .stat-val { font-family:'DM Serif Display',serif; font-size:20px; color:#B7E4C7; line-height:1; margin-bottom:3px; }
+  .stat-label { font-size:9.5px; color:#74B894; font-weight:500; letter-spacing:.05em; text-transform:uppercase; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="harp.svg" width="18" height="28" style="opacity:.8;filter:brightness(0) saturate(100%) invert(74%) sepia(36%) saturate(427%) hue-rotate(101deg) brightness(91%) contrast(80%);">
+    <div class="topbar-title">
+      <h1>Ireland Public Services AI Advisor</h1>
+      <span class="topbar-faílte">Fáilte — answers grounded in official Irish sources</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    ☘
+    <span class="topbar-source">6 sources · 1,640 docs · 16,326 chunks</span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="section-label">How a question becomes a cited answer</div>
+  <div class="pipeline-title">From query to grounded response — 7 stages</div>
+  <div class="pipeline">
+
+    <div class="step">
+      <div class="step-box s-blue">
+        <span class="step-num">01</span>
+        <span class="step-title">User<br>Question</span>
+        <span class="step-sub">"What is the<br>minimum wage<br>in Ireland?"</span>
+      </div>
+    </div>
+    <div class="arrow-sep"><svg viewBox="0 0 34 14" width="34" height="14"><path d="M2 7 H24 M18 2 L28 7 L18 12" stroke="#C4B9A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+    <div class="step">
+      <div class="step-box s-blue">
+        <span class="step-num">02</span>
+        <span class="step-title">Embed<br>Query</span>
+        <span class="step-sub">bge-small-en-v1.5<br>384-dim vector<br>(CPU, in-container)</span>
+      </div>
+    </div>
+    <div class="arrow-sep"><svg viewBox="0 0 34 14" width="34" height="14"><path d="M2 7 H24 M18 2 L28 7 L18 12" stroke="#C4B9A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+    <div class="hybrid-group">
+      <span class="hybrid-label">☘ Hybrid Retrieval</span>
+      <div class="hybrid-inner">
+        <div class="step">
+          <div class="step-box">
+            <span class="step-num">03a</span>
+            <span class="step-title">BM25<br>Search</span>
+            <span class="step-sub">Postgres tsvector<br>term frequency<br>top 20 results</span>
+          </div>
+        </div>
+        <div class="hybrid-divider"></div>
+        <div class="step">
+          <div class="step-box">
+            <span class="step-num">03b</span>
+            <span class="step-title">Dense<br>Search</span>
+            <span class="step-sub">pgvector HNSW<br>cosine similarity<br>top 20 results</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="arrow-sep"><svg viewBox="0 0 34 14" width="34" height="14"><path d="M2 7 H24 M18 2 L28 7 L18 12" stroke="#C4B9A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+    <div class="step">
+      <div class="step-box s-purple">
+        <span class="step-num">04</span>
+        <span class="step-title">RRF<br>Fusion</span>
+        <span class="step-sub">Σ 1/(60+rank)<br>merges both lists<br>top 20 merged</span>
+      </div>
+    </div>
+    <div class="arrow-sep"><svg viewBox="0 0 34 14" width="34" height="14"><path d="M2 7 H24 M18 2 L28 7 L18 12" stroke="#C4B9A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+    <div class="step">
+      <div class="step-box s-purple">
+        <span class="step-num">05</span>
+        <span class="step-title">Cross-Encoder<br>Reranker</span>
+        <span class="step-sub">bge-reranker-base<br>reads query+chunk<br>top 5 parents</span>
+      </div>
+    </div>
+    <div class="arrow-sep"><svg viewBox="0 0 34 14" width="34" height="14"><path d="M2 7 H24 M18 2 L28 7 L18 12" stroke="#C4B9A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+    <div class="step">
+      <div class="step-box s-amber">
+        <span class="step-num">06</span>
+        <span class="step-title">Llama 3.3 70B<br>via NVIDIA</span>
+        <span class="step-sub">NIM free API<br>streams tokens<br>with [n] citations</span>
+        <span class="step-tag">Free tier</span>
+      </div>
+    </div>
+    <div class="arrow-sep"><svg viewBox="0 0 34 14" width="34" height="14"><path d="M2 7 H24 M18 2 L28 7 L18 12" stroke="#C4B9A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+    <div class="step">
+      <div class="step-box s-green">
+        <span class="step-num">07</span>
+        <span class="step-title">Cited<br>Answer</span>
+        <span class="step-sub">Streaming SSE<br>citation chips<br>source links</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><span class="stat-val">100%</span><span class="stat-label">Recall@5</span></div>
+  <div class="stat"><span class="stat-val">1.0</span><span class="stat-label">Avg Rank</span></div>
+  <div class="stat"><span class="stat-val">0.93</span><span class="stat-label">Faithfulness</span></div>
+  <div class="stat"><span class="stat-val">1,640</span><span class="stat-label">Documents</span></div>
+  <div class="stat"><span class="stat-val">16,326</span><span class="stat-label">Chunks indexed</span></div>
+  <div class="stat"><span class="stat-val">$0</span><span class="stat-label">Hosting / month</span></div>
+</div>
+</body>
+</html>

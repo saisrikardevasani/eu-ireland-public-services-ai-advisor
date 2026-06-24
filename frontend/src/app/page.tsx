@@ -77,7 +77,7 @@ export default function HomePage() {
               Ireland Public Services Advisor
             </span>
             <span className="hidden sm:inline-block text-[10px] font-semibold text-forest-300 bg-forest-700 border border-forest-600 rounded px-2 py-0.5 tracking-wide">
-              v0.5
+              v0.6
             </span>
           </div>
           <div className="flex items-center gap-6">
@@ -378,11 +378,13 @@ export default function HomePage() {
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-stone-900 mb-2">What we do not store</h3>
+                <h3 className="text-sm font-semibold text-stone-900 mb-2">What we store and what we don&apos;t</h3>
                 <p className="text-stone-500 text-sm leading-relaxed">
-                  This service does not log, store, or retain your questions or answers.
-                  No user accounts, no session history, no analytics tied to your queries.
-                  The only data stored is the curated knowledge base of official Irish guidance.
+                  Your question text is never stored. If you submit a thumbs up/down rating,
+                  a one-way SHA-256 hash of your question is stored — your original text cannot
+                  be recovered from it. Anonymised page-view analytics are collected by Vercel
+                  Analytics (no personal data, no query content). No user accounts or session
+                  history are retained.
                 </p>
               </div>
               <div>

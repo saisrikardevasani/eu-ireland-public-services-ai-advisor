@@ -28,7 +28,12 @@ export async function streamChat(
   });
 
   if (!response.ok) {
-    callbacks.onError(`Server error: ${response.status}`);
+    const msg = response.status === 503
+      ? "The backend is still waking up. Wait ~30 seconds and try again."
+      : response.status === 429
+      ? "Rate limit reached. Please wait a moment before sending another message."
+      : `Server error: ${response.status}`;
+    callbacks.onError(msg);
     return;
   }
 

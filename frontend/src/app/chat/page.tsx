@@ -33,13 +33,27 @@ function ChatContent() {
   // starts the container so it's warm by the time the user hits Send.
   useEffect(() => {
     const slow = setTimeout(() => setWarmup("slow"), 3000);
+    let cancelled = false;
 
-    fetch("/api/v1/health")
-      .then(() => setWarmup("ready"))
-      .catch(() => setWarmup("ready"))
-      .finally(() => clearTimeout(slow));
+    const ping = () => {
+      fetch("/api/v1/health")
+        .then((res) => {
+          if (cancelled) return;
+          if (res.ok) {
+            setWarmup("ready");
+            clearTimeout(slow);
+          } else {
+            // 503 = still sleeping, retry
+            setTimeout(ping, 4000);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setTimeout(ping, 4000);
+        });
+    };
 
-    return () => clearTimeout(slow);
+    ping();
+    return () => { cancelled = true; clearTimeout(slow); };
   }, []);
 
   useEffect(() => {

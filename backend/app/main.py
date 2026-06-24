@@ -13,7 +13,7 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["20/minute"])
 
 app = FastAPI(
     title="Ireland Public Services AI Advisor",
-    version="0.5.0",
+    version="0.6.0",
     description="RAG system over Irish government and EU legislative sources.",
 )
 

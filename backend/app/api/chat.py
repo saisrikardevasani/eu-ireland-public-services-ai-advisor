@@ -16,14 +16,14 @@ For LLM streaming (one-way), SSE is the right tool.
 import json
 import logging
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cache import get_cached, set_cached
+from app.cache import check_daily_limit, get_cached, set_cached
 from app.database import get_db
 from app.pipeline.generator import generate
 from app.pipeline.retrieval import retrieve
@@ -64,6 +64,12 @@ async def chat(
     db: AsyncSession = Depends(get_db),
 ) -> StreamingResponse:
     """Retrieve relevant passages and stream a grounded answer."""
+    ip = get_remote_address(http_request)
+    if not await check_daily_limit(ip):
+        raise HTTPException(
+            status_code=429,
+            detail="You've reached the daily limit of 20 questions. Please try again tomorrow.",
+        )
 
     async def event_stream():
         query = request.validated_message

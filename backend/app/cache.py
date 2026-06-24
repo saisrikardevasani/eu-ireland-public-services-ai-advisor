@@ -1,17 +1,18 @@
-"""Redis-backed query cache.
+"""Redis-backed query cache and daily rate limit counter.
 
-Caches retrieval results keyed on a SHA-256 of the lowercased query.
-TTL is 6 hours — short enough to pick up daily gov.ie updates,
-long enough to serve repeated common questions without hitting the DB.
+Query cache: keyed on SHA-256 of the lowercased query, TTL 6 hours.
+Daily limit: per-IP request counter, resets at midnight UTC.
 
-Cache misses are transparent: the caller gets None and falls through
-to the normal retrieval pipeline.
+Cache misses and Redis errors are transparent — the caller falls through
+to the normal retrieval pipeline. Rate limit errors fail open (allow the
+request) so a Redis outage never takes down the service.
 """
 
 import hashlib
 import json
 import logging
 from dataclasses import asdict
+from datetime import date
 
 import redis.asyncio as aioredis
 
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 _redis: aioredis.Redis | None = None
 
 CACHE_TTL = 60 * 60 * 6  # 6 hours
+DAILY_LIMIT = 20          # max requests per IP per calendar day
 
 
 def _client() -> aioredis.Redis:
@@ -58,3 +60,21 @@ async def set_cached(query: str, chunks: list[RetrievedChunk]) -> None:
         logger.debug("Cached %d chunks for query: %s…", len(chunks), query[:60])
     except Exception as exc:
         logger.warning("Cache write failed (ignoring): %s", exc)
+
+
+async def check_daily_limit(ip: str) -> bool:
+    """Increment the per-IP daily request counter. Returns False if the cap is exceeded.
+
+    Key format: ratelimit:daily:<ip>:<YYYY-MM-DD> (resets at midnight UTC).
+    Fails open on Redis errors so a cache outage never blocks the service.
+    """
+    key = f"ratelimit:daily:{ip}:{date.today().isoformat()}"
+    try:
+        client = _client()
+        count = await client.incr(key)
+        if count == 1:
+            await client.expire(key, 86400)  # 24h TTL set on first request of the day
+        return count <= DAILY_LIMIT
+    except Exception as exc:
+        logger.warning("Daily rate limit check failed (failing open): %s", exc)
+        return True

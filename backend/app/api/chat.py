@@ -19,7 +19,6 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,8 +27,6 @@ from app.database import get_db
 from app.pipeline.generator import generate
 from app.pipeline.retrieval import retrieve
 from app.session import append_turn, get_history
-
-limiter = Limiter(key_func=get_remote_address)
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +54,8 @@ def _sse(event: str, data: dict | str) -> str:
 
 
 @router.post("/v1/chat/messages")
-@limiter.limit("10/minute")
 async def chat(
-    http_request: Request,  # required by slowapi for IP-based rate limiting
+    http_request: Request,
     request: ChatRequest,
     db: AsyncSession = Depends(get_db),
 ) -> StreamingResponse:
